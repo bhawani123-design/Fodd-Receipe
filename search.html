@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="styles/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+  </head>
+  <style>
+    #search {
+      width: 50%;
+      /* margin: auto; */
+      /* background-color: blueviolet; */
+      height: 50px;
+      margin-top: 20px;
+    }
+    #search input {
+      height: 30px;
+      position: relative;
+      width: 300px;
+    }
+    .icon {
+      font-size: 30px;
+      position: absolute;
+      margin-left: -31px;
+    }
+  </style>
+  <body></body>
+</html>
+
+<script type="module">
+  import myNavbar from "./components/navbar.js";
+  //   import myNavbar from "./components/navbar.js";
+
+  document.body.innerHTML = myNavbar();
+
+  import { getData } from "./scripts/showData.js";
+  // For search button
+  let boddy = document.querySelector("body");
+
+  let searchBar = document.createElement("div");
+  searchBar.setAttribute("id", "search");
+  let searchInp = document.createElement("input");
+  searchInp.addEventListener("input", () => {
+    throttleFunction();
+  });
+  searchInp.type = "text";
+  searchInp.placeholder = "Enter a recipe";
+  let searchIcon = document.createElement("i");
+  searchIcon.setAttribute("class", "fa fa-search icon");
+  //   searchIcon.addEventListener("click", () => {
+  //     throttleFunction();
+  //   });
+  //   console.log(searchInp);
+  searchBar.append(searchInp, searchIcon);
+
+  boddy.append(searchBar);
+
+  // For search functionality
+
+  //   console.log("data:", data);
+
+  let parent = document.createElement("div");
+  let tempDiv = document.createElement("div");
+  parent.setAttribute("id", "data");
+  boddy.append(tempDiv, parent);
+  //   response1.then((data) => {
+  //     // console.log("response1:", strInstructions);
+
+  //   });
+  let timId;
+
+  function throttleFunction() {
+    if (timId) {
+      return false;
+    }
+
+    timId = setTimeout(() => {
+      main();
+      timId = undefined;
+    }, 2000);
+  }
+
+  function main() {
+    tempDiv.innerHTML = null;
+    let query = searchInp.value;
+    console.log("query:", query);
+    if (query.length <= 1) {
+      return false;
+    }
+    let response1 = getData(
+      `https://www.themealdb.com/api/json/v1/1/search.php?s=${query}`
+    );
+
+    let tempD = document.createElement("div");
+    response1.then(({ meals }) => {
+      //   console.log("meals:", meals);
+      meals.forEach(({ strMeal }) => {
+        let p_meal = document.createElement("p");
+        p_meal.style.cursor = "pointer";
+        console.log("p_meal:", strMeal);
+        p_meal.addEventListener("click", () => {
+          searchInp.value = null;
+          tempDiv.innerHTML = null;
+          appendData(meals, strMeal, parent);
+        });
+        p_meal.innerHTML = strMeal;
+        tempD.append(p_meal);
+      });
+      tempDiv.append(tempD);
+    });
+
+    function appendData(meals, strMeal1, parent) {
+      console.log("Meal:", meals);
+      parent.innerHTML = null;
+      meals.forEach(({ strMeal, strCategory, strArea, strInstructions }) => {
+        if (strMeal1 == strMeal) {
+          let Tag = document.createElement("p");
+          let Tag1 = document.createElement("p");
+          Tag.innerHTML = `<h4>Dish Name:</h4> <h3>${strMeal}</h3> <br><h4>Category:</h4>  <h3>${strCategory}</h3> <br><h4>Dish:</h4>  <h3>${strArea}</h3><br>`;
+          Tag1.innerHTML = `<h4>recipe:</h4> <h3>${strInstructions}</h3>`;
+          parent.append(Tag, Tag1);
+        }
+      });
+    }
+  }
+</script>
